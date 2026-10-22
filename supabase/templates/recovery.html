@@ -1,0 +1,5 @@
+<!-- {{ .RedirectTo }} is always the app's /auth/confirm?next=… URL (see signup and forgot-password forms). -->
+<h2>Reset your password</h2>
+<p>Someone asked to reset the password for this account. If it was you, choose a new password:</p>
+<p><a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery">Choose a new password</a></p>
+<p>If you didn't ask for this, you can ignore this email. Your password won't change.</p>

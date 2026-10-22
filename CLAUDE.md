@@ -65,16 +65,22 @@ Keep this section accurate as scripts are added.
 
 ```
 pnpm install
-pnpm dev                 # run web app locally
+pnpm dev                 # run web app locally (needs apps/web/.env.local, see .env.example)
+pnpm build               # production build of every package
 pnpm typecheck
 pnpm lint
 pnpm test                # unit tests (all packages)
-pnpm test:integration    # against a real local Postgres (Supabase CLI)
-pnpm test:e2e            # Playwright
-pnpm db:generate         # drizzle-kit generate migration
-pnpm db:migrate          # apply migrations
-pnpm db:seed             # seed CoA templates, tax codes, golden fixture company
+pnpm test:integration    # real Postgres at TEST_DATABASE_URL (default postgres://postgres:postgres@127.0.0.1:54322/kedge_test);
+                         # each run drops and rebuilds kedge_test and kedge_test_web
+pnpm test:e2e            # Playwright; needs `supabase start`, migrations applied and the app built (see README)
+pnpm db:generate         # drizzle-kit generate migration from packages/db/src/schema
+pnpm db:migrate          # apply migrations to DATABASE_URL
+pnpm db:seed             # seed CoA templates, tax codes, golden fixture company (empty until Phase 1)
+supabase start           # local Supabase: Postgres :54322, Auth API :54321, Mailpit :54324
 ```
+
+Custom SQL (RLS policies, functions, triggers) goes in a migration created with
+`pnpm --filter @kedge/db exec drizzle-kit generate --custom --name <name>`.
 
 Run `pnpm typecheck && pnpm lint && pnpm test` before declaring any task done. Also run `pnpm test:integration` when anything in `packages/db` or the ledger changed.
 
