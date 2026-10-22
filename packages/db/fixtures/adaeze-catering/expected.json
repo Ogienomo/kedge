@@ -1,0 +1,170 @@
+{
+  "status": "DRAFT: computed independently of the product; awaiting hand verification by a qualified accountant",
+  "company": "Adaeze Catering Ltd",
+  "trialBalance": {
+    "asOf": "2025-12-31",
+    "rows": [
+      {
+        "code": "1010",
+        "name": "Cash on hand",
+        "debit": "176371250",
+        "credit": "0"
+      },
+      {
+        "code": "1020",
+        "name": "GTBank – Current",
+        "debit": "543377500",
+        "credit": "0"
+      },
+      {
+        "code": "1200",
+        "name": "Inventory",
+        "debit": "38000000",
+        "credit": "0"
+      },
+      {
+        "code": "1400",
+        "name": "VAT input (recoverable)",
+        "debit": "2250000",
+        "credit": "0"
+      },
+      {
+        "code": "1410",
+        "name": "WHT receivable (credit notes)",
+        "debit": "180925000",
+        "credit": "0"
+      },
+      {
+        "code": "1550",
+        "name": "Plant and machinery",
+        "debit": "410000000",
+        "credit": "0"
+      },
+      {
+        "code": "1590",
+        "name": "Accumulated depreciation",
+        "debit": "0",
+        "credit": "127999996"
+      },
+      {
+        "code": "2100",
+        "name": "VAT output",
+        "debit": "0",
+        "credit": "77588750"
+      },
+      {
+        "code": "2500",
+        "name": "Long-term loans",
+        "debit": "0",
+        "credit": "100000000"
+      },
+      {
+        "code": "3000",
+        "name": "Owner's capital",
+        "debit": "0",
+        "credit": "300000000"
+      },
+      {
+        "code": "3100",
+        "name": "Retained earnings",
+        "debit": "0",
+        "credit": "249500000"
+      },
+      {
+        "code": "3200",
+        "name": "Drawings",
+        "debit": "90000000",
+        "credit": "0"
+      },
+      {
+        "code": "4000",
+        "name": "Sales",
+        "debit": "0",
+        "credit": "11283800000"
+      },
+      {
+        "code": "5000",
+        "name": "Cost of sales",
+        "debit": "6664550000",
+        "credit": "0"
+      },
+      {
+        "code": "6000",
+        "name": "Salaries and wages",
+        "debit": "3000000000",
+        "credit": "0"
+      },
+      {
+        "code": "6100",
+        "name": "Rent",
+        "debit": "420000000",
+        "credit": "0"
+      },
+      {
+        "code": "6120",
+        "name": "Diesel and generator",
+        "debit": "368350000",
+        "credit": "0"
+      },
+      {
+        "code": "6200",
+        "name": "Fuel and transport",
+        "debit": "122150000",
+        "credit": "0"
+      },
+      {
+        "code": "6300",
+        "name": "Telephone and internet",
+        "debit": "30000000",
+        "credit": "0"
+      },
+      {
+        "code": "6800",
+        "name": "Bank charges",
+        "debit": "4915000",
+        "credit": "0"
+      },
+      {
+        "code": "7100",
+        "name": "Depreciation",
+        "debit": "63999996",
+        "credit": "0"
+      },
+      {
+        "code": "8200",
+        "name": "Interest expense",
+        "debit": "24000000",
+        "credit": "0"
+      }
+    ],
+    "totalDebit": "12138888746",
+    "totalCredit": "12138888746"
+  },
+  "incomeStatement": {
+    "from": "2025-01-01",
+    "to": "2025-12-31",
+    "revenue": "11283800000",
+    "costOfSales": "6664550000",
+    "grossProfit": "4619250000",
+    "operatingExpenses": "4009414996",
+    "operatingProfit": "609835004",
+    "otherIncome": "0",
+    "financeCosts": "24000000",
+    "profitBeforeTax": "585835004",
+    "incomeTax": "0",
+    "profitForPeriod": "585835004"
+  },
+  "balanceSheet": {
+    "asOf": "2025-12-31",
+    "nonCurrentAssets": "282000004",
+    "currentAssets": "940923750",
+    "totalAssets": "1222923754",
+    "equityAccounts": "459500000",
+    "priorYearsEarnings": "0",
+    "currentYearEarnings": "585835004",
+    "totalEquity": "1045335004",
+    "currentLiabilities": "77588750",
+    "nonCurrentLiabilities": "100000000",
+    "totalLiabilities": "177588750"
+  }
+}

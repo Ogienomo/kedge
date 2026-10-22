@@ -48,6 +48,8 @@ export function errorResponse(e: unknown): { status: number; body: ApiError } {
   }
   // Unknown errors: log the type only (never payloads), answer generically.
   console.error("[api] unhandled error", e instanceof Error ? e.name : typeof e);
+  // Local debugging only: full details can include data, so never enable in production.
+  if (process.env.KEDGE_DEBUG_ERRORS === "1" && process.env.NODE_ENV !== "production") console.error(e);
   return { status: 500, body: { error: { code: "internal_error", message: "Something went wrong. Please try again." } } };
 }
 

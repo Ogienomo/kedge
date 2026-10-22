@@ -151,6 +151,10 @@ export async function createTransaction(ctx: ServiceContext, entityId: string, r
         .from(schema.bankAccounts)
         .where(and(eq(schema.bankAccounts.id, input.bankAccountId), eq(schema.bankAccounts.entityId, entityId)));
       if (!bank) throw new NotFoundError("Bank account");
+      const known = await accountMap(tx, entityId);
+      for (const accountId of [input.counterAccountId, input.interestAccountId]) {
+        if (accountId && !known.has(accountId)) throw new NotFoundError("Account");
+      }
 
       const id = crypto.randomUUID();
       const values = {
