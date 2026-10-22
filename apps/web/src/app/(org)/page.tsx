@@ -1,11 +1,10 @@
 import { roleLabel } from "@kedge/core";
-import { Badge, Card, EmptyState } from "@kedge/ui";
+import { Badge, Button, Card, EmptyState } from "@kedge/ui";
 import { ChevronRight, Landmark } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { loadCurrentOrgId, loadOrg } from "@/server/loaders";
-import { AddBusinessButton } from "./add-business";
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ add?: string }> }) {
   const { add } = await searchParams;
@@ -13,16 +12,25 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const canCreate = org.orgPermissions.includes("entity.create");
   const isFirm = org.organisation.kind === "firm";
 
-  // A business with its books set up goes straight to them.
+  // Firms work from the practice list; a business goes straight to its books,
+  // or into onboarding when it has none yet.
+  if (isFirm && org.role !== null) redirect("/practice");
   const only = org.entities.length === 1 ? org.entities[0] : undefined;
   if (!isFirm && only && !add) redirect(`/e/${only.id}/dashboard`);
+  if (!isFirm && org.entities.length === 0 && canCreate) redirect("/onboarding/business");
 
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
         title={isFirm ? "Clients" : "Your businesses"}
         description={isFirm ? `Client businesses managed by ${org.organisation.name}.` : org.organisation.name}
-        actions={canCreate && org.entities.length > 0 ? <AddBusinessButton orgId={org.organisation.id} isFirm={isFirm} defaultOpen={add === "1"} /> : null}
+        actions={
+          canCreate && org.entities.length > 0 ? (
+            <Button asChild variant="secondary">
+              <Link href={isFirm ? "/practice/clients/new" : "/onboarding/business"}>Add {isFirm ? "client" : "business"}</Link>
+            </Button>
+          ) : null
+        }
       />
 
       {org.entities.length === 0 ? (
@@ -36,7 +44,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 : "Add your business to start a set of books. You can add more businesses later."
               : "You don't have access to any businesses here yet. Ask an admin to give you access."
           }
-          action={canCreate ? <AddBusinessButton orgId={org.organisation.id} isFirm={isFirm} defaultOpen={add === "1"} variant="primary" /> : null}
+          action={
+            canCreate ? (
+              <Button asChild>
+                <Link href={isFirm ? "/practice/clients/new" : "/onboarding/business"}>Set up</Link>
+              </Button>
+            ) : null
+          }
         />
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

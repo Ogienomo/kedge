@@ -1,10 +1,10 @@
 "use client";
 
 import { Button, cn, Kbd, Logo } from "@kedge/ui";
-import { LayoutDashboard, Plus, Search, Settings, User } from "lucide-react";
+import { ArrowLeftRight, BookOpen, Building2, CalendarRange, FileBarChart, History, LayoutDashboard, ListTree, Plus, Search, Settings, User, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { CommandPalette } from "./command-palette";
 import { ContextSwitcher } from "./context-switcher";
 import { ModeToggle } from "./mode-toggle";
@@ -18,16 +18,33 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  useHotkey("/", useCallback(() => setSearchOpen(true), []));
+  useHotkey("/", () => setSearchOpen(true));
   const entity = data.org.entities.find((e) => e.id === data.entityId) ?? null;
   const canRecord = entity?.permissions.includes("transaction.create") ?? false;
-  useHotkey("n", useCallback(() => setAddOpen(canRecord), [canRecord]));
+  useHotkey("n", () => setAddOpen(canRecord));
 
-  const nav = [
-    ...(entity ? [{ href: `/e/${entity.id}/dashboard`, label: "Dashboard", icon: LayoutDashboard }] : [{ href: "/", label: "Businesses", icon: LayoutDashboard }]),
-    { href: "/org/settings", label: "Team", icon: Settings },
-    { href: "/account", label: "Account", icon: User },
+  const isFirm = data.org.organisation.kind === "firm";
+  const simple = entity?.displayMode === "simple";
+  const has = (p: string) => entity?.permissions.includes(p as never) ?? false;
+  const base = entity ? `/e/${entity.id}` : "";
+  const nav: { href: string; label: string; icon: typeof LayoutDashboard; group: "entity" | "org" }[] = [
+    ...(entity
+      ? [
+          { href: `${base}/dashboard`, label: "Dashboard", icon: LayoutDashboard, group: "entity" as const },
+          { href: `${base}/transactions`, label: simple ? "Money in & out" : "Transactions", icon: ArrowLeftRight, group: "entity" as const },
+          { href: `${base}/contacts`, label: "Contacts", icon: Users, group: "entity" as const },
+          { href: `${base}/accounts`, label: simple ? "Categories" : "Chart of accounts", icon: ListTree, group: "entity" as const },
+          ...(!simple && has("report.view") ? [{ href: `${base}/journals`, label: "Journals", icon: BookOpen, group: "entity" as const }] : []),
+          ...(!simple && has("report.view") ? [{ href: `${base}/periods`, label: "Periods", icon: CalendarRange, group: "entity" as const }] : []),
+          ...(has("report.view") ? [{ href: `${base}/reports`, label: "Reports", icon: FileBarChart, group: "entity" as const }] : []),
+          ...(has("audit_log.view") ? [{ href: `${base}/audit`, label: "Audit log", icon: History, group: "entity" as const }] : []),
+        ]
+      : []),
+    { href: isFirm ? "/practice" : "/", label: isFirm ? "Clients" : "Businesses", icon: Building2, group: "org" },
+    { href: "/org/settings", label: "Team", icon: Settings, group: "org" },
+    { href: "/account", label: "Account", icon: User, group: "org" },
   ];
+  const isCurrent = (href: string) => pathname === href || (href !== "/" && href.split("/").length > 3 && pathname.startsWith(`${href}/`));
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -77,7 +94,7 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
             <Link
               key={item.href}
               href={item.href}
-              aria-current={pathname === item.href ? "page" : undefined}
+              aria-current={isCurrent(item.href) ? "page" : undefined}
               className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-muted hover:bg-subtle aria-[current=page]:bg-accent aria-[current=page]:text-accent-foreground [&_svg]:size-4"
             >
               <item.icon aria-hidden />
@@ -90,11 +107,11 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
       <div className="flex flex-1">
         <nav aria-label="Main" className="hidden w-56 shrink-0 border-r border-border bg-surface px-3 py-4 lg:block">
           <ul className="grid gap-0.5">
-            {nav.map((item) => (
-              <li key={item.href}>
+            {nav.map((item, i) => (
+              <li key={item.href} className={cn(i > 0 && item.group !== nav[i - 1]?.group && "mt-3 border-t border-border pt-3")}>
                 <Link
                   href={item.href}
-                  aria-current={pathname === item.href ? "page" : undefined}
+                  aria-current={isCurrent(item.href) ? "page" : undefined}
                   className={cn(
                     "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted hover:bg-subtle hover:text-foreground [&_svg]:size-4",
                     "aria-[current=page]:bg-accent aria-[current=page]:font-medium aria-[current=page]:text-accent-foreground",
@@ -113,7 +130,7 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
       </div>
 
       <CommandPalette org={data.org} open={searchOpen} onOpenChange={setSearchOpen} />
-      <QuickAdd open={addOpen} onOpenChange={setAddOpen} />
+      {entity ? <QuickAdd entity={entity} open={addOpen} onOpenChange={setAddOpen} /> : null}
     </div>
   );
 }

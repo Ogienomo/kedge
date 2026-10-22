@@ -48,7 +48,7 @@ export function ContextSwitcher({ me, org, entityId }: ShellData) {
         </DropdownMenuItem>
         {canCreate ? (
           <DropdownMenuItem asChild>
-            <Link href="/?add=1">
+            <Link href={org.organisation.kind === "firm" ? "/practice/clients/new" : "/onboarding/business"}>
               <Plus aria-hidden />
               Add a business
             </Link>

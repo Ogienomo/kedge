@@ -22,11 +22,14 @@
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.118.0",
     "@tanstack/react-query": "5.104.5",
+    "@tanstack/react-table": "8.21.3",
     "drizzle-orm": "0.45.4",
+    "exceljs": "4.4.0",
     "lucide-react": "1.61.0",
     "next": "16.4.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "recharts": "3.10.1",
     "zod": "4.6.7"
   },
   "devDependencies": {

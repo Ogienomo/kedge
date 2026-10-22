@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 function isTyping(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
@@ -9,15 +9,19 @@ function isTyping(target: EventTarget | null): boolean {
 
 /** Single-key shortcut that never fires while the user is typing in a field. */
 export function useHotkey(key: string, handler: () => void): void {
+  const latest = useRef(handler);
+  useEffect(() => {
+    latest.current = handler;
+  });
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return;
       if (e.key.toLowerCase() === key.toLowerCase()) {
         e.preventDefault();
-        handler();
+        latest.current();
       }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [key, handler]);
+  }, [key]);
 }
