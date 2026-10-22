@@ -29,7 +29,7 @@ import { createBankAccount, createContact, createTaxCodeVersion, listBankAccount
 import { getDashboard, listAudit, listPracticeClients } from "../services/ledger/insights";
 import { createJournal, deleteJournalDraft, getJournal, listJournals, postJournalDraft, reverseJournal, updateJournalDraft } from "../services/ledger/journals";
 import { addNextFiscalYear, listPeriods, lockPeriod, unlockPeriod } from "../services/ledger/periods";
-import { runReport } from "../services/ledger/reports";
+import { exportReport, runReport } from "../services/ledger/reports";
 import { createEntityWithBooks, getEntityDetail, setUpEntityBooks } from "../services/ledger/setup";
 import { createTransaction, getTransaction, listTransactions, postTransaction, reverseTransaction } from "../services/ledger/transactions";
 import { z } from "zod";
@@ -180,6 +180,12 @@ export const endpoints = {
     params: ["entityId"],
     query: reportQuerySchema.extend({ report: reportParams.shape.report }),
     run: (ctx, { params, query }) => runReport(ctx, params.entityId, query.report, query),
+  }),
+  exportReport: endpoint({
+    auth: "required",
+    params: ["entityId"],
+    query: reportQuerySchema.extend({ report: reportParams.shape.report, format: z.enum(["csv", "xlsx"]) }),
+    run: (ctx, { params, query }) => exportReport(ctx, params.entityId, query.report, query, query.format),
   }),
   listAudit: endpoint({
     auth: "required",

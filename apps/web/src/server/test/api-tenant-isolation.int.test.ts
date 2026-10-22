@@ -82,6 +82,7 @@ const targetsInOrgB: Record<string, () => { params: Record<string, string>; body
   postOpeningBalances: () => ({ params: { entityId: b.entityId }, body: { balances: [{ accountId: b.ledger.accounts.bank, debit: "1" }] }, idempotencyKey: "isolation-test-key" }),
   runReport: () => ({ params: { entityId: b.entityId }, query: { report: "trial-balance" } }),
   listAudit: () => ({ params: { entityId: b.entityId } }),
+  exportReport: () => ({ params: { entityId: b.entityId }, query: { report: "trial-balance", format: "csv" } }),
 };
 
 describe("API tenant isolation", () => {

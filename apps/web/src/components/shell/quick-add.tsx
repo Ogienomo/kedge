@@ -48,7 +48,8 @@ function toTax(t: TaxCodeDto, accounts: Account[]): TaxCode {
   };
 }
 
-const pct = (bps: number) => `${(bps / 100).toFixed(bps % 100 === 0 ? 0 : 2)}%`;
+/** 750 → "7.5%" with integer arithmetic. */
+const pct = (bps: number) => `${Math.trunc(bps / 100)}${bps % 100 ? `.${String(bps % 100).padStart(2, "0").replace(/0$/, "")}` : ""}%`;
 
 /** Quick add (SPEC §6.4): records a simple-mode transaction through the posting map. */
 export function QuickAdd({ entity, open, onOpenChange }: { entity: EntitySummary; open: boolean; onOpenChange: (open: boolean) => void }) {

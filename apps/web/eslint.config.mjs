@@ -10,6 +10,10 @@ export default defineConfig([
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
       "no-restricted-globals": ["error", { name: "parseFloat", message: "Never use floating point for money. Use Money from @kedge/core." }],
+      "no-restricted-syntax": [
+        "error",
+        { selector: "CallExpression[callee.property.name='toFixed']", message: "Never format money with toFixed; use formatMoney from @kedge/core (rule 4)." },
+      ],
     },
   },
   {
@@ -22,6 +26,8 @@ export default defineConfig([
           selector: "BinaryExpression[operator=/^[!=]==$/] > Literal[value=/^(org_owner|org_admin|accountant|bookkeeper|client_owner|client_staff|viewer)$/]",
           message: "Do not compare roles directly. Check permissions with can() from @kedge/core.",
         },
+        // Repeated here because this block replaces the rule's options for src/app.
+        { selector: "CallExpression[callee.property.name='toFixed']", message: "Never format money with toFixed; use formatMoney from @kedge/core (rule 4)." },
       ],
     },
   },

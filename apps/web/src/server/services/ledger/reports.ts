@@ -21,6 +21,7 @@ import {
 } from "@kedge/core";
 import { withUser } from "@kedge/db";
 import { requireClaims, type ServiceContext } from "../../context";
+import { reportToCsv, reportToXlsx } from "../../exports";
 import { entityScope, fiscalYearStartFor, loadAccounts, loadPostedLines } from "./scope";
 
 const ref = (a: ReportAccount) => ({ id: a.id, code: a.code, name: a.name, subtype: a.subtype });
@@ -214,5 +215,26 @@ export async function runReport(ctx: ServiceContext, entityId: string, report: R
         };
       }
     }
+  });
+}
+
+/** Report export as CSV or XLSX (SPEC §9.1). PDF export awaits a library decision. */
+export async function exportReport(ctx: ServiceContext, entityId: string, report: ReportKey, raw: ReportQuery, format: "csv" | "xlsx"): Promise<Response> {
+  const data = await runReport(ctx, entityId, report, raw);
+  const claims = requireClaims(ctx);
+  const name = await withUser(ctx.db, claims, async (tx) => {
+    const scope = await entityScope(tx, claims, entityId, ctx.now);
+    assertCan(scope.actor, "data.export", entityId, ctx.now);
+    return scope.entity.tradingName ?? scope.entity.legalName;
+  });
+  const stamp = "asOf" in data ? data.asOf : `${data.from}_${data.to}`;
+  const filename = `${name.replace(/[^A-Za-z0-9]+/g, "-")}_${report}_${stamp}.${format}`;
+  const body = format === "csv" ? reportToCsv(data, name) : await reportToXlsx(data, name);
+  return new Response(new Uint8Array(typeof body === "string" ? Buffer.from(body, "utf8") : body), {
+    headers: {
+      "content-type": format === "csv" ? "text/csv; charset=utf-8" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "content-disposition": `attachment; filename="${filename}"`,
+      "cache-control": "no-store",
+    },
   });
 }
