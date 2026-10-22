@@ -12,6 +12,7 @@ import {
 } from "@kedge/ui";
 import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useTheme, type ThemePreference } from "../theme";
 import type { ShellData } from "./types";
@@ -24,6 +25,7 @@ function initials(name: string | null, email: string): string {
 
 export function UserMenu({ me, extra }: Pick<ShellData, "me"> & { extra?: ReactNode }) {
   const [theme, setTheme] = useTheme();
+  const router = useRouter();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -59,14 +61,16 @@ export function UserMenu({ me, extra }: Pick<ShellData, "me"> & { extra?: ReactN
           <DropdownMenuRadioItem value="system">Match my device</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
-        <form action="/auth/signout" method="post">
-          <DropdownMenuItem asChild>
-            <button type="submit" className="w-full">
-              <LogOut aria-hidden />
-              Log out
-            </button>
-          </DropdownMenuItem>
-        </form>
+        <DropdownMenuItem
+          onSelect={async () => {
+            await fetch("/auth/signout", { method: "POST", redirect: "manual" });
+            router.replace("/login");
+            router.refresh();
+          }}
+        >
+          <LogOut aria-hidden />
+          Log out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

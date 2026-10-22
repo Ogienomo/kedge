@@ -13,6 +13,8 @@ const serverEnvSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
   EMAIL_FROM: z.string().min(3).default("Kedge <no-reply@example.com>"),
+  /** Write emails to this directory instead of sending them (local, CI). Ignored when RESEND_API_KEY is set. */
+  EMAIL_OUTBOX_DIR: z.string().min(1).optional(),
   SENTRY_DSN: z.string().optional(),
   BANK_ACCOUNT_ENCRYPTION_KEY: z.string().min(40).optional(),
 });

@@ -36,6 +36,7 @@ export function InvitationsPanel({ orgId, options, invitations }: { orgId: strin
   const [inviteOpen, setInviteOpen] = useState(false);
   const [toRevoke, setToRevoke] = useState<Invitation | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   const scopes = useMemo(
@@ -54,11 +55,12 @@ export function InvitationsPanel({ orgId, options, invitations }: { orgId: strin
     setPending(true);
     setError(null);
     try {
-      await api.createInvitation(orgId, {
+      const created = await api.createInvitation(orgId, {
         email: String(form.get("email") ?? ""),
         role: String(form.get("role")) as InvitableRole,
         entityId: scope === ORG_SCOPE ? null : scope,
       });
+      setNotice(created.emailSent === false ? `The invitation was saved, but we couldn't email ${created.email}. Revoke it and try again in a few minutes.` : null);
       setInviteOpen(false);
       router.refresh();
     } catch (err) {
@@ -100,7 +102,8 @@ export function InvitationsPanel({ orgId, options, invitations }: { orgId: strin
           </Button>
         ) : null}
       </CardHeader>
-      <CardContent>
+      <CardContent className="grid gap-4">
+        {notice ? <Alert tone="warning" title={notice} /> : null}
         {invitations.length === 0 ? (
           <p className="text-sm text-muted">No invitations yet.</p>
         ) : (

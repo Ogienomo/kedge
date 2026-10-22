@@ -82,6 +82,7 @@ jobs:
           eval "$(supabase status -o env)"
           {
             echo "APP_URL=http://localhost:3000"
+            echo "EMAIL_OUTBOX_DIR=.dev-outbox"
             echo "NEXT_PUBLIC_SUPABASE_URL=${API_URL}"
             echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY:-$PUBLISHABLE_KEY}"
             echo "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY:-$SECRET_KEY}"

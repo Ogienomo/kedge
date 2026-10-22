@@ -68,10 +68,12 @@ let configured: EmailSender | undefined;
  * The app's email sender: Resend when configured; otherwise the dev outbox,
  * which is refused in production so emails are never silently dropped.
  */
-export function appEmailSender(env: { NODE_ENV: string; RESEND_API_KEY?: string | undefined; EMAIL_FROM: string }): EmailSender {
+export function appEmailSender(env: { NODE_ENV: string; RESEND_API_KEY?: string | undefined; EMAIL_FROM: string; EMAIL_OUTBOX_DIR?: string | undefined }): EmailSender {
   if (configured) return configured;
   if (env.RESEND_API_KEY) {
     configured = resendSender(env.RESEND_API_KEY, env.EMAIL_FROM);
+  } else if (env.EMAIL_OUTBOX_DIR) {
+    configured = devOutboxSender(join(process.cwd(), env.EMAIL_OUTBOX_DIR));
   } else if (env.NODE_ENV === "production") {
     configured = {
       send: async () => {

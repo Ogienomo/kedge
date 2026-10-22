@@ -31,7 +31,10 @@ for (const colorScheme of ["light", "dark"] as const) {
     await expect(toggle.getByRole("radio", { name: "Accountant" })).toHaveAttribute("aria-checked", "true");
     await toggle.getByRole("radio", { name: "Simple" }).click();
     await expect(p.getByText("Your books are ready to set up")).toBeVisible();
-    if (!wide) await p.keyboard.press("Escape");
+    if (!wide) {
+      await p.keyboard.press("Escape");
+      await expect(p.getByRole("menu")).toBeHidden();
+    }
 
     // Search opens with "/".
     await p.keyboard.press("/");

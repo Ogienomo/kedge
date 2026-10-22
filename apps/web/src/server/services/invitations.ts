@@ -112,15 +112,23 @@ export async function createInvitation(ctx: ServiceContext, orgId: string, raw: 
   // and the inviter can revoke and resend.
   const link = `${ctx.appUrl}/invite/${token}`;
   const where = invitation.entityName ?? orgName;
-  await ctx.email.send({
+  const sent = await ctx.email
+    .send({
     kind: "invitation",
     to: invitation.email,
     subject: `You're invited to ${where} on ${APP_NAME}`,
     text: `You've been invited to join ${where} on ${APP_NAME} as ${roleLabel(invitation.role)}.\n\nAccept the invitation: ${link}\n\nThis link expires in 7 days.`,
     html: `<p>You've been invited to join <strong>${escapeHtml(where)}</strong> on ${APP_NAME} as ${escapeHtml(roleLabel(invitation.role))}.</p><p><a href="${escapeHtml(link)}">Accept the invitation</a></p><p>This link expires in 7 days.</p>`,
-  });
+    })
+    .then(
+      () => true,
+      () => {
+        console.error("[email] invitation email failed", { invitationId: invitation.id });
+        return false;
+      },
+    );
 
-  return invitation;
+  return { ...invitation, emailSent: sent };
 }
 
 export async function invitationOptions(ctx: ServiceContext, orgId: string): Promise<InvitationOptions> {

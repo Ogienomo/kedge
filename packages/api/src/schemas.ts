@@ -137,6 +137,8 @@ export const invitationSchema = z.object({
   status: z.enum(["pending", "accepted", "revoked", "expired"]),
   expiresAt: isoDateTime,
   createdAt: isoDateTime,
+  /** Present on create: false when the invitation was saved but its email could not be sent. */
+  emailSent: z.boolean().optional(),
 });
 export type Invitation = z.infer<typeof invitationSchema>;
 
