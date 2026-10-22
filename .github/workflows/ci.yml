@@ -69,7 +69,14 @@ jobs:
           version: 2.121.0
       - run: pnpm install --frozen-lockfile
       - name: Start Supabase (auth, database, mail)
-        run: supabase start -x studio,imgproxy,edge-runtime,logflare,vector,realtime,storage-api,postgres-meta,supavisor
+        run: |
+          set -o pipefail
+          if ! supabase start -x studio,imgproxy,edge-runtime,logflare,vector,realtime,storage-api,postgres-meta,supavisor 2>&1 | tee /tmp/supabase-start.log; then
+            # Surface the failure as an annotation so it is readable without downloading logs.
+            msg=$(tail -c 3000 /tmp/supabase-start.log | sed -e 's/%/%25/g' | sed -e ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=supabase start failed::${msg}"
+            exit 1
+          fi
       - name: Configure environment
         run: |
           eval "$(supabase status -o env)"
