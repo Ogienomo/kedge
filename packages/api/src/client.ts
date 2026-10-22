@@ -13,6 +13,7 @@ import {
   type CreateEntityRequest,
   type CreateInvitationRequest,
   type CreateOrganisationRequest,
+  type UpdateOrganisationRequest,
   type UpdateEntityPreferencesRequest,
   type UpdateProfileRequest,
 } from "./schemas";
@@ -110,6 +111,7 @@ export function createApiClient(options: ApiClientOptions = {}) {
     updateProfile: (body: UpdateProfileRequest) => request("PATCH", "/me", meResponseSchema, body),
     createOrganisation: (body: CreateOrganisationRequest) => request("POST", "/organisations", organisationContextSchema, body),
     getOrganisation: (orgId: string) => request("GET", `/organisations/${enc(orgId)}`, organisationContextSchema),
+    updateOrganisation: (orgId: string, body: UpdateOrganisationRequest) => request("PATCH", `/organisations/${enc(orgId)}`, organisationContextSchema, body),
     listMembers: (orgId: string) => request("GET", `/organisations/${enc(orgId)}/members`, membersResponseSchema),
     createEntity: (orgId: string, body: CreateEntityRequest) => request("POST", `/organisations/${enc(orgId)}/entities`, entitySummarySchema, body),
     updateEntityPreferences: (entityId: string, body: UpdateEntityPreferencesRequest) =>

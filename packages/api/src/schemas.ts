@@ -88,6 +88,20 @@ export const createOrganisationRequestSchema = z.object({
 });
 export type CreateOrganisationRequest = z.infer<typeof createOrganisationRequestSchema>;
 
+/** Org settings / firm wizard: name and brand colour (`#RRGGBB`). Logo upload arrives with file storage. */
+export const updateOrganisationRequestSchema = z
+  .object({
+    name: name.optional(),
+    brandColour: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/, "Use a colour like #1F6FEB")
+      .transform((v) => v.toUpperCase())
+      .nullable()
+      .optional(),
+  })
+  .refine((v) => v.name !== undefined || v.brandColour !== undefined, "Nothing to change");
+export type UpdateOrganisationRequest = z.infer<typeof updateOrganisationRequestSchema>;
+
 export const organisationContextSchema = z.object({
   organisation: organisationSchema,
   role: orgRoleSchema.nullable(),

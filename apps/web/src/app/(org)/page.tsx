@@ -12,9 +12,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const canCreate = org.orgPermissions.includes("entity.create");
   const isFirm = org.organisation.kind === "firm";
 
-  // Firms work from the practice list; a business goes straight to its books,
-  // or into onboarding when it has none yet.
-  if (isFirm && org.role !== null) redirect("/practice");
+  // Firms work from the practice list (a new firm starts in its set-up wizard);
+  // a business goes straight to its books, or into onboarding when it has none yet.
+  if (isFirm && org.role !== null) redirect(org.entities.length === 0 && org.orgPermissions.includes("org.users.manage") ? "/onboarding/firm" : "/practice");
   const only = org.entities.length === 1 ? org.entities[0] : undefined;
   if (!isFirm && only && !add) redirect(`/e/${only.id}/dashboard`);
   if (!isFirm && org.entities.length === 0 && canCreate) redirect("/onboarding/business");

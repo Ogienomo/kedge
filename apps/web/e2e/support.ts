@@ -72,9 +72,9 @@ export async function signUp(page: Page, opts: { email: string; name: string; or
 /**
  * Runs the set-up wizard (SPEC §6.2) from its first step with defaults and
  * no bank accounts, starting from zero. Ends on the dashboard and returns the
- * entity id.
+ * entity id, or with `finish: "continue"` (firm wizard) moves on to the next step.
  */
-export async function completeSetupWizard(page: Page, opts: { legalName?: string; noun?: "business" | "client" } = {}): Promise<string> {
+export async function completeSetupWizard(page: Page, opts: { legalName?: string; noun?: "business" | "client"; finish?: "dashboard" | "continue" } = {}): Promise<string> {
   await expect(page.getByRole("heading", { name: opts.noun === "client" ? "About this client" : "About your business" })).toBeVisible();
   if (opts.legalName) await page.getByLabel("Registered name").fill(opts.legalName);
   await page.getByRole("button", { name: "Continue" }).click();
@@ -85,6 +85,10 @@ export async function completeSetupWizard(page: Page, opts: { legalName?: string
   await page.getByRole("button", { name: "Set up books" }).click();
   await page.getByRole("button", { name: /Start from zero/ }).click();
   await expect(page.getByRole("heading", { name: /books are ready/ })).toBeVisible();
+  if (opts.finish === "continue") {
+    await page.getByRole("button", { name: "Continue" }).click();
+    return "";
+  }
   await page.getByRole("link", { name: "Go to dashboard" }).click();
   await expect(page).toHaveURL(/\/e\/[0-9a-f-]+\/dashboard$/);
   const id = /\/e\/([0-9a-f-]+)\/dashboard/.exec(page.url())?.[1];

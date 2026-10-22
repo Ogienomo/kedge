@@ -25,6 +25,8 @@ export interface SetupWizardProps {
   today: string;
   /** Wording for firms adding a client. */
   noun?: "business" | "client";
+  /** When set, the final step continues here instead of linking to the new books (firm wizard). */
+  onComplete?: (entityId: string) => void;
 }
 
 interface Details {
@@ -68,7 +70,7 @@ function StepCard({ title, description, children, footer }: { title: string; des
 }
 
 /** SPEC §6.2 business set-up wizard; firms run the same steps for a client. */
-export function SetupWizard({ orgId, entityId: existingEntityId, defaults, today, noun = "business" }: SetupWizardProps) {
+export function SetupWizard({ orgId, entityId: existingEntityId, defaults, today, noun = "business", onComplete }: SetupWizardProps) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [details, setDetails] = useState<Details>({
@@ -377,14 +379,18 @@ export function SetupWizard({ orgId, entityId: existingEntityId, defaults, today
               <h2 className="text-xl font-semibold tracking-tight">{noun === "client" ? "The client's books are ready" : "Your books are ready"}</h2>
               <p className="text-sm text-muted">Record your first money in or money out, or finish the set-up checklist.</p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button asChild>
-                <Link href={`/e/${entityId}/dashboard`}>Go to dashboard</Link>
-              </Button>
-              <Button asChild variant="secondary">
-                <Link href={`/e/${entityId}/setup`}>Set-up checklist</Link>
-              </Button>
-            </div>
+            {onComplete ? (
+              <Button onClick={() => onComplete(entityId)}>Continue</Button>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                <Button asChild>
+                  <Link href={`/e/${entityId}/dashboard`}>Go to dashboard</Link>
+                </Button>
+                <Button asChild variant="secondary">
+                  <Link href={`/e/${entityId}/setup`}>Set-up checklist</Link>
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       ) : null}

@@ -14,6 +14,9 @@ Building Phase 1 (SPEC §13) needed a few details the spec does not spell out. N
 - **Invitations: `emailSent`.** Sending the invitation email is no longer fatal. The invitation is created in the same transaction as its audit row; the email goes out afterwards and its outcome is returned as `emailSent`, so the UI can offer the link to copy instead.
 - **`EMAIL_OUTBOX_DIR`.** Without Resend credentials, emails are written to this directory (development and CI). In production with neither set, sending fails loudly rather than silently dropping mail.
 - **Golden dataset WHT rate.** The Adaeze Catering fixture creates its own WHT code with an illustrative rate. It is **unverified** and must not be read as a statement of Nigerian law. The fixture's expected figures are a DRAFT until hand-verified (CLAUDE.md, testing requirements).
+- **Editing organisation details** (name, brand colour) uses the existing `org.users.manage` permission (Owner and Admin). The §3.3 matrix has no separate "org settings" permission, and the RLS update policy on `organisations` already uses this one, so the matrix is unchanged.
+- **Firm wizard logo.** `/onboarding/firm` collects the name and brand colour, runs the business wizard for the first client and offers team invitations. **Logo upload is deferred** until file storage arrives with uploads (Phase 2: virus scanning, size and content-type checks). `organisations.logo_file_id` already exists.
+- A new firm whose owner can manage the org is sent to `/onboarding/firm` until it has a client. "Skip set-up" goes to `/practice`.
 - **Report export.** CSV and XLSX are implemented. XLSX subtotals and totals are live `SUM` formulas (AC-1.11). **PDF export is deferred**: server-side PDF generation needs a library that is not yet in the stack, which CLAUDE.md says to ask about first. Printing from the browser (print stylesheet) is the interim option.
 
 ## Consequences

@@ -6,6 +6,7 @@ test("an owner invites a client owner who signs up and lands in the business", a
   const ownerEmail = uniqueEmail("owner");
   await signUp(page, { email: ownerEmail, name: "Ngozi Okafor", orgName: "Okafor & Partners", kind: "firm" });
   await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("link", { name: "Skip set-up" }).click();
   await page.getByRole("link", { name: "Add client" }).first().click();
   await completeSetupWizard(page, { legalName: "Lekki Clinic Ltd", noun: "client" });
   await expect(page.getByRole("heading", { name: "Lekki Clinic Ltd" })).toBeVisible();

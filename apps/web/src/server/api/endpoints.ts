@@ -16,6 +16,7 @@ import {
   createEntityRequestSchema,
   createInvitationRequestSchema,
   createOrganisationRequestSchema,
+  updateOrganisationRequestSchema,
   invitationTokenRequestSchema,
   updateEntityPreferencesRequestSchema,
   updateProfileRequestSchema,
@@ -23,7 +24,7 @@ import {
 import { createEntity, updateEntityPreferences } from "../services/entities";
 import { acceptInvitation, createInvitation, invitationOptions, listInvitations, previewInvitation, revokeInvitation } from "../services/invitations";
 import { getMe, setMfaEnabled, updateProfile } from "../services/me";
-import { createOrganisation, getOrganisationContext, listMembers } from "../services/organisations";
+import { createOrganisation, getOrganisationContext, listMembers, updateOrganisation } from "../services/organisations";
 import { createAccount, listAccounts, updateAccount } from "../services/ledger/accounts";
 import { createBankAccount, createContact, createTaxCodeVersion, listBankAccounts, listContacts, listTaxCodes, postOpeningBalances, updateContact } from "../services/ledger/directory";
 import { getDashboard, listAudit, listPracticeClients } from "../services/ledger/insights";
@@ -68,6 +69,7 @@ export const endpoints = {
     run: (ctx, { body }) => createOrganisation(ctx, body),
   }),
   getOrganisation: endpoint({ auth: "required", params: ["orgId"], run: (ctx, { params }) => getOrganisationContext(ctx, params.orgId) }),
+  updateOrganisation: endpoint({ auth: "required", params: ["orgId"], body: updateOrganisationRequestSchema, run: (ctx, { params, body }) => updateOrganisation(ctx, params.orgId, body) }),
   listMembers: endpoint({ auth: "required", params: ["orgId"], run: (ctx, { params }) => listMembers(ctx, params.orgId) }),
 
   createEntity: endpoint({

@@ -29,6 +29,7 @@ type AnyEndpoint = Endpoint<string, unknown, unknown>;
 /** For each endpoint that takes IDs: org B's IDs, and a valid body if one is needed. */
 const targetsInOrgB: Record<string, () => { params: Record<string, string>; body?: unknown; query?: Record<string, string>; idempotencyKey?: string }> = {
   getOrganisation: () => ({ params: { orgId: b.orgId } }),
+  updateOrganisation: () => ({ params: { orgId: b.orgId }, body: { name: "Hijacked" } }),
   listMembers: () => ({ params: { orgId: b.orgId } }),
   createEntity: () => ({ params: { orgId: b.orgId }, body: { legalName: "Hijack Ltd" } }),
   updateEntityPreferences: () => ({ params: { entityId: b.entityId }, body: { displayMode: "simple" } }),

@@ -1,5 +1,5 @@
-import type { CreateOrganisationRequest, Member, OrganisationContext } from "@kedge/api";
-import { NotFoundError, PermissionDeniedError, trialEndsAt } from "@kedge/core";
+import type { CreateOrganisationRequest, Member, OrganisationContext, UpdateOrganisationRequest } from "@kedge/api";
+import { can, NotFoundError, PermissionDeniedError, trialEndsAt } from "@kedge/core";
 import { schema, withUser, type Tx } from "@kedge/db";
 import { asc, eq } from "drizzle-orm";
 import { loadActor } from "../actor";
@@ -52,6 +52,21 @@ async function organisationContext(tx: Tx, ctx: ServiceContext, orgId: string): 
     orgPermissions: orgPermissions(actor, ctx.now),
     entities: await summariseEntities(tx, actor, await entitiesInOrg(tx, orgId), ctx.now),
   };
+}
+
+/** Renames the org or sets its brand colour (Owner and Admin, as the RLS update policy also requires). */
+export async function updateOrganisation(ctx: ServiceContext, orgId: string, input: UpdateOrganisationRequest): Promise<OrganisationContext> {
+  const claims = requireClaims(ctx);
+  return withUser(ctx.db, claims, async (tx) => {
+    const actor = await loadActor(tx, claims, orgId);
+    if (!can(actor, "org.users.manage", null, ctx.now)) throw new PermissionDeniedError("org.users.manage", "Only an owner or admin can change the organisation's details");
+    const [before] = await tx.select({ name: schema.organisations.name, brandColour: schema.organisations.brandColour }).from(schema.organisations).where(eq(schema.organisations.id, orgId));
+    if (!before) throw new NotFoundError("Organisation");
+    const after = { name: input.name ?? before.name, brandColour: input.brandColour === undefined ? before.brandColour : input.brandColour };
+    await tx.update(schema.organisations).set(after).where(eq(schema.organisations.id, orgId));
+    await writeAudit(tx, ctx, claims.sub, { orgId, action: "organisation.update", targetType: "organisation", targetId: orgId, before, after });
+    return organisationContext(tx, ctx, orgId);
+  });
 }
 
 export async function getOrganisationContext(ctx: ServiceContext, orgId: string): Promise<OrganisationContext> {

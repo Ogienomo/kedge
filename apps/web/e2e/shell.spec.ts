@@ -10,7 +10,9 @@ for (const colorScheme of ["light", "dark"] as const) {
     await signUp(p, { email, name: "Tunde Bello", orgName: "Bello & Co", kind: "firm" });
     await p.getByRole("button", { name: "Continue" }).click();
 
-    // A firm lands on its client list; adding a client runs the set-up wizard.
+    // A new firm starts in its set-up wizard; skipping it lands on the client list.
+    await expect(p).toHaveURL(/\/onboarding\/firm$/);
+    await p.getByRole("link", { name: "Skip set-up" }).click();
     await expect(p).toHaveURL(/\/practice$/);
     await p.getByRole("link", { name: "Add client" }).first().click();
     await completeSetupWizard(p, { legalName: "Adaeze Catering Ltd", noun: "client" });
