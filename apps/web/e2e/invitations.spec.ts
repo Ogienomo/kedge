@@ -1,14 +1,13 @@
 /** Invitation acceptance through the UI for a brand-new user (AC-0.3 happy path, end to end). */
 import { expect, test } from "@playwright/test";
-import { PASSWORD, signUp, uniqueEmail } from "./support";
+import { completeSetupWizard, PASSWORD, signUp, uniqueEmail } from "./support";
 
 test("an owner invites a client owner who signs up and lands in the business", async ({ page, browser }) => {
   const ownerEmail = uniqueEmail("owner");
   await signUp(page, { email: ownerEmail, name: "Ngozi Okafor", orgName: "Okafor & Partners", kind: "firm" });
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("button", { name: "Add client" }).first().click();
-  await page.getByLabel("Registered name").fill("Lekki Clinic Ltd");
-  await page.getByRole("button", { name: "Add client" }).last().click();
+  await page.getByRole("link", { name: "Add client" }).first().click();
+  await completeSetupWizard(page, { legalName: "Lekki Clinic Ltd", noun: "client" });
   await expect(page.getByRole("heading", { name: "Lekki Clinic Ltd" })).toBeVisible();
 
   const clientEmail = uniqueEmail("client");
@@ -47,5 +46,5 @@ test("an owner invites a client owner who signs up and lands in the business", a
   await client.getByRole("button", { name: "Accept invitation" }).click();
   await expect(client.getByRole("heading", { name: "Lekki Clinic Ltd" })).toBeVisible();
   // Client owners start in Simple mode.
-  await expect(client.getByText("Your books are ready to set up")).toBeVisible();
+  await expect(client.getByText("Money you have")).toBeVisible();
 });

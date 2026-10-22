@@ -76,6 +76,8 @@ pnpm test:e2e            # Playwright; needs `supabase start`, migrations applie
 pnpm db:generate         # drizzle-kit generate migration from packages/db/src/schema
 pnpm db:migrate          # apply migrations to DATABASE_URL
 pnpm db:seed             # seed CoA templates, tax codes, golden fixture company (empty until Phase 1)
+pnpm --filter @kedge/db exec tsx fixtures/adaeze-catering/generate.ts
+                         # regenerate the golden dataset and its DRAFT expected figures
 supabase start           # local Supabase: Postgres :54322, Auth API :54321, Mailpit :54324
 ```
 

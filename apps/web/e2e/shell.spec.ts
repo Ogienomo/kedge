@@ -1,6 +1,6 @@
 /** AC-0.7 (automated part): the shell, switchers and mode toggle at 360 px and 1440 px, light and dark. */
 import { expect, test } from "@playwright/test";
-import { expectNoHorizontalScroll, signUp, uniqueEmail } from "./support";
+import { completeSetupWizard, expectNoHorizontalScroll, signUp, uniqueEmail } from "./support";
 
 for (const colorScheme of ["light", "dark"] as const) {
   test(`app shell in ${colorScheme} theme`, async ({ browser }, info) => {
@@ -10,10 +10,10 @@ for (const colorScheme of ["light", "dark"] as const) {
     await signUp(p, { email, name: "Tunde Bello", orgName: "Bello & Co", kind: "firm" });
     await p.getByRole("button", { name: "Continue" }).click();
 
-    // Add a client, which opens its dashboard.
-    await p.getByRole("button", { name: "Add client" }).first().click();
-    await p.getByLabel("Registered name").fill("Adaeze Catering Ltd");
-    await p.getByRole("button", { name: "Add client" }).last().click();
+    // A firm lands on its client list; adding a client runs the set-up wizard.
+    await expect(p).toHaveURL(/\/practice$/);
+    await p.getByRole("link", { name: "Add client" }).first().click();
+    await completeSetupWizard(p, { legalName: "Adaeze Catering Ltd", noun: "client" });
     await expect(p.getByRole("heading", { name: "Adaeze Catering Ltd" })).toBeVisible();
 
     expect(await p.evaluate(() => document.documentElement.dataset.theme)).toBe(colorScheme);
@@ -30,7 +30,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     const toggle = p.getByRole("radiogroup", { name: "Display mode" }).first();
     await expect(toggle.getByRole("radio", { name: "Accountant" })).toHaveAttribute("aria-checked", "true");
     await toggle.getByRole("radio", { name: "Simple" }).click();
-    await expect(p.getByText("Your books are ready to set up")).toBeVisible();
+    await expect(p.getByText("Money you have")).toBeVisible();
     if (!wide) {
       await p.keyboard.press("Escape");
       await expect(p.getByRole("menu")).toBeHidden();
@@ -41,7 +41,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     await expect(p.getByRole("combobox")).toBeFocused();
     await p.keyboard.press("Escape");
 
-    for (const path of ["/", "/org/settings", "/account"]) {
+    for (const path of ["/practice", "/org/settings", "/account"]) {
       await p.goto(path);
       await expectNoHorizontalScroll(p);
     }

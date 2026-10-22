@@ -11,10 +11,10 @@ test("sign up, verify email, enable TOTP and log in with MFA", async ({ page }) 
   const email = uniqueEmail("ac01");
   await signUp(page, { email, name: "Ada Obi", orgName: "Ada Bakery", kind: "business" });
 
-  // Welcome step creates the organisation (AC-0.2) and lands on the empty home.
+  // Welcome step creates the organisation (AC-0.2) and opens the set-up wizard.
   await expect(page.getByLabel("Business name")).toHaveValue("Ada Bakery");
   await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByRole("heading", { name: "Set up your business" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "About your business" })).toBeVisible();
 
   // Enable TOTP.
   await page.goto("/account");
@@ -44,7 +44,7 @@ test("sign up, verify email, enable TOTP and log in with MFA", async ({ page }) 
   await page.waitForTimeout(30_000 - (now % 30_000) + 500);
   await page.getByLabel("Authentication code").fill(totp(secret));
   await page.getByRole("button", { name: "Verify" }).click();
-  await expect(page.getByRole("heading", { name: "Set up your business" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "About your business" })).toBeVisible();
 });
 
 test("wrong password is refused without revealing whether the account exists", async ({ page }) => {
