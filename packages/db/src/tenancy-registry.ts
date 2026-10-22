@@ -11,6 +11,16 @@ export const TENANT_TABLES = {
   user_entity_prefs: { orgColumn: "org_id" },
   invitations: { orgColumn: "org_id" },
   audit_log: { orgColumn: "org_id" },
+  accounts: { orgColumn: "org_id" },
+  fiscal_years: { orgColumn: "org_id" },
+  periods: { orgColumn: "org_id" },
+  contacts: { orgColumn: "org_id" },
+  tax_codes: { orgColumn: "org_id" },
+  journal_entries: { orgColumn: "org_id" },
+  journal_lines: { orgColumn: "org_id" },
+  number_sequences: { orgColumn: "org_id" },
+  bank_accounts: { orgColumn: "org_id" },
+  transactions: { orgColumn: "org_id" },
 } as const satisfies Record<string, { orgColumn: string }>;
 
 export type TenantTable = keyof typeof TENANT_TABLES;

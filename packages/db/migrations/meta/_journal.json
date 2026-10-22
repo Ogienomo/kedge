@@ -15,6 +15,20 @@
       "when": 1792668384060,
       "tag": "0001_rls_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792672579189,
+      "tag": "0002_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792672637147,
+      "tag": "0003_ledger_rules",
+      "breakpoints": true
     }
   ]
 }
