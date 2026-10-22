@@ -38,7 +38,8 @@ for (const colorScheme of ["light", "dark"] as const) {
       await expect(p.getByRole("menu")).toBeHidden();
     }
 
-    // Search opens with "/".
+    // Search opens with "/" (on mobile, once the closed menu has returned focus).
+    if (!wide) await expect(p.getByRole("button", { name: "Your account" })).toBeFocused();
     await p.keyboard.press("/");
     await expect(p.getByRole("combobox")).toBeFocused();
     await p.keyboard.press("Escape");

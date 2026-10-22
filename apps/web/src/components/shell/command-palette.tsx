@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogTitle, Kbd } from "@kedge/ui";
 import { Landmark, Search, Settings, User } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import type { ShellData } from "./types";
 
 interface Command {
@@ -19,6 +19,7 @@ export function CommandPalette({ org, open, onOpenChange }: Pick<ShellData, "org
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const commands = useMemo<Command[]>(() => {
     const all: Command[] = [
@@ -39,13 +40,22 @@ export function CommandPalette({ org, open, onOpenChange }: Pick<ShellData, "org
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="top-[15vh] max-w-xl translate-y-0 gap-0 p-0 sm:p-0">
+      <DialogContent
+        className="top-[15vh] max-w-xl translate-y-0 gap-0 p-0 sm:p-0"
+        onOpenAutoFocus={(e) => {
+          // Focus the search box explicitly (not the first focusable), and again
+          // on the next frame in case a closing menu hands focus back to its trigger.
+          e.preventDefault();
+          inputRef.current?.focus();
+          requestAnimationFrame(() => inputRef.current?.focus());
+        }}
+      >
         <DialogTitle className="sr-only">Search</DialogTitle>
         <DialogDescription className="sr-only">Find a business or page. Use the arrow keys to move and Enter to open.</DialogDescription>
         <div className="flex items-center gap-2 border-b border-border px-4">
           <Search aria-hidden className="size-4 text-muted" />
           <input
-            autoFocus
+            ref={inputRef}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);

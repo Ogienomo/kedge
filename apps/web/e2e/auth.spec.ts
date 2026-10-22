@@ -54,7 +54,8 @@ test("wrong password is refused without revealing whether the account exists", a
   await page.getByLabel("Email").fill(uniqueEmail("nobody"));
   await page.getByLabel("Password").fill("wrong-password-123");
   await page.getByRole("button", { name: "Log in" }).click();
-  await expect(page.getByRole("alert")).toContainText("don't match");
+  // Next's route announcer is also an alert region; match ours by its text.
+  await expect(page.getByRole("alert").filter({ hasText: "don't match" })).toBeVisible();
 });
 
 test("signed-out visitors are sent to log in", async ({ page }) => {
