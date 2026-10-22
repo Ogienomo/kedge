@@ -160,3 +160,10 @@ export const acceptInvitationResponseSchema = z.object({
   entityId: id.nullable(),
 });
 export type AcceptInvitationResponse = z.infer<typeof acceptInvitationResponseSchema>;
+
+/** Where the caller may invite people, and with which roles (drives the invite form). */
+export const invitationOptionsSchema = z.object({
+  organisation: z.array(invitableRoleSchema),
+  entities: z.array(z.object({ id, name: z.string(), roles: z.array(invitableRoleSchema) })),
+});
+export type InvitationOptions = z.infer<typeof invitationOptionsSchema>;

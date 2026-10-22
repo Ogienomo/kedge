@@ -6,8 +6,9 @@ import { serverEnv } from "@/server/env";
 
 /** Supabase client bound to the request cookies (server components, route handlers, server actions). */
 export async function supabaseServer(): Promise<SupabaseClient> {
-  const env = serverEnv();
+  // Reading cookies first marks the route as dynamic before anything else runs.
   const store = await cookies();
+  const env = serverEnv();
   return createServerClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
     cookies: {
       getAll: () => store.getAll(),

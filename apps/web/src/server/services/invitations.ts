@@ -1,4 +1,4 @@
-import type { AcceptInvitationResponse, CreateInvitationRequest, Invitation, InvitationPreview } from "@kedge/api";
+import type { AcceptInvitationResponse, CreateInvitationRequest, Invitation, InvitationOptions, InvitationPreview } from "@kedge/api";
 import { createInvitationRequestSchema } from "@kedge/api";
 import {
   assertCanAccept,
@@ -8,6 +8,7 @@ import {
   generateInvitationToken,
   grantsForInvitation,
   hashInvitationToken,
+  invitableRoles,
   invitationExpiresAt,
   invitationStatus,
   NotFoundError,
@@ -15,7 +16,7 @@ import {
 } from "@kedge/core";
 import { APP_NAME } from "@kedge/config";
 import { schema, withServiceRole, withUser, type Tx } from "@kedge/db";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import { loadActor } from "../actor";
 import { writeAudit } from "../audit";
 import { requireClaims, type ServiceContext } from "../context";
@@ -120,6 +121,22 @@ export async function createInvitation(ctx: ServiceContext, orgId: string, raw: 
   });
 
   return invitation;
+}
+
+export async function invitationOptions(ctx: ServiceContext, orgId: string): Promise<InvitationOptions> {
+  const claims = requireClaims(ctx);
+  return withUser(ctx.db, claims, async (tx) => {
+    const actor = await loadActor(tx, claims, orgId);
+    const entities = await tx
+      .select({ id: schema.entities.id, name: schema.entities.legalName })
+      .from(schema.entities)
+      .where(and(eq(schema.entities.orgId, orgId), eq(schema.entities.status, "active")))
+      .orderBy(asc(schema.entities.legalName));
+    return {
+      organisation: [...invitableRoles(actor, null, ctx.now)],
+      entities: entities.map((e) => ({ ...e, roles: [...invitableRoles(actor, e.id, ctx.now)] })).filter((e) => e.roles.length > 0),
+    };
+  });
 }
 
 /** Invitations the caller manages in this org (RLS limits rows to their scope). */

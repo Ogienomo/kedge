@@ -7,7 +7,7 @@ import {
   updateProfileRequestSchema,
 } from "@kedge/api";
 import { createEntity, updateEntityPreferences } from "../services/entities";
-import { acceptInvitation, createInvitation, listInvitations, previewInvitation, revokeInvitation } from "../services/invitations";
+import { acceptInvitation, createInvitation, invitationOptions, listInvitations, previewInvitation, revokeInvitation } from "../services/invitations";
 import { getMe, setMfaEnabled, updateProfile } from "../services/me";
 import { createOrganisation, getOrganisationContext, listMembers } from "../services/organisations";
 import { endpoint } from "./endpoint";
@@ -45,6 +45,7 @@ export const endpoints = {
     run: (ctx, { params, body }) => updateEntityPreferences(ctx, params.entityId, body),
   }),
 
+  invitationOptions: endpoint({ auth: "required", params: ["orgId"], run: (ctx, { params }) => invitationOptions(ctx, params.orgId) }),
   listInvitations: endpoint({ auth: "required", params: ["orgId"], run: (ctx, { params }) => listInvitations(ctx, params.orgId) }),
   createInvitation: endpoint({
     auth: "required",

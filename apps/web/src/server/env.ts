@@ -28,9 +28,6 @@ export function serverEnv(): ServerEnv {
     const names = parsed.error.issues.map((i) => i.path.join(".")).join(", ");
     throw new Error(`Invalid server environment: ${names}`);
   }
-  if (parsed.data.NODE_ENV === "production" && !parsed.data.RESEND_API_KEY) {
-    throw new Error("Invalid server environment: RESEND_API_KEY is required in production");
-  }
   cached = parsed.data;
   return cached;
 }

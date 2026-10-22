@@ -32,6 +32,7 @@ const targetsInOrgB: Record<string, () => { params: Record<string, string>; body
   listMembers: () => ({ params: { orgId: b.orgId } }),
   createEntity: () => ({ params: { orgId: b.orgId }, body: { legalName: "Hijack Ltd" } }),
   updateEntityPreferences: () => ({ params: { entityId: b.entityId }, body: { displayMode: "simple" } }),
+  invitationOptions: () => ({ params: { orgId: b.orgId } }),
   listInvitations: () => ({ params: { orgId: b.orgId } }),
   createInvitation: () => ({ params: { orgId: b.orgId }, body: { email: "x@example.test", role: "org_admin" } }),
   revokeInvitation: () => ({ params: { invitationId: b.invitationId } }),

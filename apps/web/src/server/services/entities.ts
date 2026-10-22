@@ -61,3 +61,12 @@ export async function updateEntityPreferences(ctx: ServiceContext, entityId: str
     return summary;
   });
 }
+
+/** The org of an entity the caller can see, or null (unknown and inaccessible look the same). */
+export async function orgOfVisibleEntity(ctx: ServiceContext, entityId: string): Promise<string | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(entityId)) return null;
+  return withUser(ctx.db, requireClaims(ctx), async (tx) => {
+    const [row] = await tx.select({ orgId: schema.entities.orgId }).from(schema.entities).where(eq(schema.entities.id, entityId));
+    return row?.orgId ?? null;
+  });
+}

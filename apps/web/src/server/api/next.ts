@@ -3,18 +3,10 @@ import { PermissionDeniedError } from "@kedge/core";
 import { supabaseServer, verifiedClaims } from "@/lib/supabase/server";
 import type { ServiceContext } from "../context";
 import { getDb } from "../db";
-import { devOutboxSender, resendSender, type EmailSender } from "../email";
+import { appEmailSender } from "../email";
 import { serverEnv } from "../env";
 import { executeEndpoint, type Endpoint } from "./endpoint";
 import { errorResponse } from "./errors";
-
-let emailSender: EmailSender | undefined;
-
-function getEmailSender(): EmailSender {
-  const env = serverEnv();
-  emailSender ??= env.RESEND_API_KEY ? resendSender(env.RESEND_API_KEY, env.EMAIL_FROM) : devOutboxSender();
-  return emailSender;
-}
 
 function bearerToken(req: NextRequest): string | null {
   const header = req.headers.get("authorization");
@@ -63,7 +55,7 @@ export function toRoute<P extends string, B>(def: Endpoint<P, B>) {
           ip: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
           userAgent: req.headers.get("user-agent"),
         },
-        email: getEmailSender(),
+        email: appEmailSender(env),
         appUrl: env.APP_URL,
         mfa: {
           hasVerifiedFactor: async () => {

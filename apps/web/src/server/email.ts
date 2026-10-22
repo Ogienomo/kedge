@@ -61,3 +61,25 @@ export function memorySender(): EmailSender & { readonly sent: EmailMessage[] } 
 export function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] ?? c);
 }
+
+let configured: EmailSender | undefined;
+
+/**
+ * The app's email sender: Resend when configured; otherwise the dev outbox,
+ * which is refused in production so emails are never silently dropped.
+ */
+export function appEmailSender(env: { NODE_ENV: string; RESEND_API_KEY?: string | undefined; EMAIL_FROM: string }): EmailSender {
+  if (configured) return configured;
+  if (env.RESEND_API_KEY) {
+    configured = resendSender(env.RESEND_API_KEY, env.EMAIL_FROM);
+  } else if (env.NODE_ENV === "production") {
+    configured = {
+      send: async () => {
+        throw new Error("RESEND_API_KEY is required in production");
+      },
+    };
+  } else {
+    configured = devOutboxSender();
+  }
+  return configured;
+}

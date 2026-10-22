@@ -3,6 +3,7 @@ import {
   acceptInvitationResponseSchema,
   apiErrorSchema,
   entitySummarySchema,
+  invitationOptionsSchema,
   invitationPreviewSchema,
   invitationSchema,
   invitationsResponseSchema,
@@ -75,6 +76,8 @@ export function createApiClient(options: ApiClientOptions = {}) {
     createEntity: (orgId: string, body: CreateEntityRequest) => request("POST", `/organisations/${enc(orgId)}/entities`, entitySummarySchema, body),
     updateEntityPreferences: (entityId: string, body: UpdateEntityPreferencesRequest) =>
       request("PUT", `/entities/${enc(entityId)}/preferences`, entitySummarySchema, body),
+    syncMfa: () => request("POST", "/me/mfa/sync", meResponseSchema),
+    invitationOptions: (orgId: string) => request("GET", `/organisations/${enc(orgId)}/invitation-options`, invitationOptionsSchema),
     listInvitations: (orgId: string) => request("GET", `/organisations/${enc(orgId)}/invitations`, invitationsResponseSchema),
     createInvitation: (orgId: string, body: CreateInvitationRequest) => request("POST", `/organisations/${enc(orgId)}/invitations`, invitationSchema, body),
     revokeInvitation: (invitationId: string) => request("POST", `/invitations/${enc(invitationId)}/revoke`, invitationSchema),
