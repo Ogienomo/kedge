@@ -14,6 +14,7 @@ const serverEnvSchema = z.object({
   RESEND_API_KEY: z.string().min(1).optional(),
   EMAIL_FROM: z.string().min(3).default("Kedge <no-reply@example.com>"),
   SENTRY_DSN: z.string().optional(),
+  BANK_ACCOUNT_ENCRYPTION_KEY: z.string().min(40).optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

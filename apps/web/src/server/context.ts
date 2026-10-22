@@ -13,6 +13,8 @@ export interface ServiceContext {
   readonly appUrl: string;
   /** Asks the auth provider (not the client) whether the caller has a verified second factor. */
   readonly mfa: { readonly hasVerifiedFactor: () => Promise<boolean> };
+  /** Base64 32-byte key for bank account numbers; null when not configured. */
+  readonly bankAccountKey: string | null;
 }
 
 export function requireClaims(ctx: ServiceContext): AuthClaims {

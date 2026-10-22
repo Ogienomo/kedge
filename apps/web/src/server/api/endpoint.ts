@@ -1,4 +1,4 @@
-import { NotFoundError, UnauthenticatedError } from "@kedge/core";
+import { NotFoundError, UnauthenticatedError, ValidationError } from "@kedge/core";
 import { schema, withUser, type AuthClaims } from "@kedge/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -12,18 +12,29 @@ type Params<P extends string> = { readonly [K in P]: string };
  * integration tests execute it directly with the same validation, auth and
  * error mapping.
  */
-export interface Endpoint<P extends string = never, B = undefined> {
+export interface Endpoint<P extends string = never, B = undefined, Q = Record<string, never>> {
   readonly auth: "required" | "public";
   readonly params?: readonly P[];
   readonly body?: z.ZodType<B>;
+  readonly query?: z.ZodType<Q>;
+  /** Posting endpoints require an Idempotency-Key header (rule 8). */
+  readonly idempotency?: "required";
   readonly status?: number;
   /** Only for endpoints that must work mid-login (e.g. syncing MFA state). */
   readonly allowBeforeMfa?: boolean;
-  readonly run: (ctx: ServiceContext, input: { params: Params<P>; body: B }) => Promise<unknown>;
+  readonly run: (ctx: ServiceContext, input: { params: Params<P>; body: B; query: Q; idempotencyKey: string }) => Promise<unknown>;
 }
 
-export function endpoint<P extends string = never, B = undefined>(def: Endpoint<P, B>): Endpoint<P, B> {
+export function endpoint<P extends string = never, B = undefined, Q = Record<string, never>>(def: Endpoint<P, B, Q>): Endpoint<P, B, Q> {
   return def;
+}
+
+const IDEMPOTENCY_KEY = /^[A-Za-z0-9_.:-]{8,200}$/;
+
+export class IdempotencyKeyRequiredError extends ValidationError {
+  constructor() {
+    super("This request needs an Idempotency-Key header (8–200 letters, digits, '-', '_', '.', ':')", [{ path: "Idempotency-Key", message: "Required" }]);
+  }
 }
 
 export interface EndpointResult {
@@ -45,10 +56,10 @@ async function assertMfaSatisfied(ctx: ServiceContext, claims: AuthClaims): Prom
   if (user?.mfaEnabled) throw new MfaRequiredError();
 }
 
-export async function executeEndpoint<P extends string, B>(
-  def: Endpoint<P, B>,
+export async function executeEndpoint<P extends string, B, Q>(
+  def: Endpoint<P, B, Q>,
   ctx: ServiceContext,
-  raw: { params: Record<string, string | string[] | undefined>; body: unknown },
+  raw: { params: Record<string, string | string[] | undefined>; body: unknown; query?: Record<string, string>; idempotencyKey?: string | null },
 ): Promise<EndpointResult> {
   try {
     if (def.auth === "required") {
@@ -64,8 +75,12 @@ export async function executeEndpoint<P extends string, B>(
       params[name] = value;
     }
 
+    const idempotencyKey = raw.idempotencyKey ?? "";
+    if (def.idempotency === "required" && !IDEMPOTENCY_KEY.test(idempotencyKey)) throw new IdempotencyKeyRequiredError();
+
     const body = def.body ? def.body.parse(raw.body) : (undefined as B);
-    const result = await def.run(ctx, { params: params as Params<P>, body });
+    const query = def.query ? def.query.parse(raw.query ?? {}) : ({} as Q);
+    const result = await def.run(ctx, { params: params as Params<P>, body, query, idempotencyKey });
     return { status: def.status ?? 200, body: result };
   } catch (e) {
     return errorResponse(e);

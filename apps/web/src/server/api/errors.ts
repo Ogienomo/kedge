@@ -13,6 +13,17 @@ const STATUS_BY_CODE: Record<string, number> = {
   invitation_expired: 410,
   invitation_unavailable: 410,
   invitation_email_mismatch: 403,
+  unbalanced_entry: 422,
+  invalid_entry: 422,
+  invalid_transaction: 422,
+  account_not_postable: 422,
+  period_not_found: 422,
+  tax_code_not_in_force: 422,
+  reason_required: 422,
+  period_locked: 409,
+  period_status: 409,
+  entry_immutable: 409,
+  already_reversed: 409,
 };
 
 export function errorResponse(e: unknown): { status: number; body: ApiError } {
@@ -28,6 +39,12 @@ export function errorResponse(e: unknown): { status: number; body: ApiError } {
   if (sqlState(e) === "42501") {
     console.error("[api] database permission backstop triggered");
     return { status: 403, body: { error: { code: "permission_denied", message: "You do not have permission to do that" } } };
+  }
+  // A ledger rule enforced by the database (rules 1, 2, 3, 5) fired after the
+  // domain checks passed: refuse with the database's plain-language message.
+  if (sqlState(e) === "23514") {
+    console.error("[api] database ledger rule triggered");
+    return { status: 422, body: { error: { code: "ledger_rule_violation", message: ledgerRuleMessage(e) } } };
   }
   // Unknown errors: log the type only (never payloads), answer generically.
   console.error("[api] unhandled error", e instanceof Error ? e.name : typeof e);
@@ -51,4 +68,16 @@ function sqlState(e: unknown): string | null {
     current = current.cause;
   }
   return null;
+}
+
+/** The innermost Postgres message for a check violation (written for users in the migrations). */
+function ledgerRuleMessage(e: unknown): string {
+  let current: unknown = e;
+  let message = "This change breaks an accounting rule";
+  for (let depth = 0; depth < 5 && current instanceof Error; depth++) {
+    const code = (current as { code?: unknown }).code;
+    if (code === "23514" && !/violates check constraint/.test(current.message)) message = current.message;
+    current = current.cause;
+  }
+  return message;
 }

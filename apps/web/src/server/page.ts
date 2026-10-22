@@ -28,6 +28,7 @@ export async function pageContext(): Promise<ServiceContext & { claims: NonNulla
     meta: { ip: null, userAgent: null },
     email: appEmailSender(env),
     appUrl: env.APP_URL,
+    bankAccountKey: env.BANK_ACCOUNT_ENCRYPTION_KEY ?? null,
     mfa: {
       hasVerifiedFactor: async () => {
         const { data } = await supabase.auth.mfa.listFactors();
@@ -47,6 +48,7 @@ export function publicContext(): ServiceContext {
     meta: { ip: null, userAgent: null },
     email: appEmailSender(env),
     appUrl: env.APP_URL,
+    bankAccountKey: null,
     mfa: { hasVerifiedFactor: async () => false },
   };
 }

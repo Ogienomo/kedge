@@ -95,3 +95,18 @@ export async function insertPostedEntry(tx: Tx, input: PostEntryInput): Promise<
     .where(eq(journalEntries.id, id));
   return { id, number, replayed: false };
 }
+
+/** Posts an existing draft in place (keeps its id). Lines must already be validated. */
+export async function postExistingDraft(
+  tx: Tx,
+  input: { orgId: string; entityId: string; entryId: string; entryDate: string; userId: string; idempotencyKey: string; now: Date },
+): Promise<PostedRef> {
+  const existing = await findByIdempotencyKey(tx, input.entityId, input.idempotencyKey);
+  if (existing?.number) return { id: existing.id, number: existing.number, replayed: true };
+  const number = await nextJournalNumber(tx, input.orgId, input.entityId, input.entryDate);
+  await tx
+    .update(journalEntries)
+    .set({ status: "posted", number, postedAt: input.now, postedBy: input.userId, idempotencyKey: input.idempotencyKey })
+    .where(eq(journalEntries.id, input.entryId));
+  return { id: input.entryId, number, replayed: false };
+}

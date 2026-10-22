@@ -30,7 +30,7 @@ const INVALID_JSON = Symbol("invalid-json");
 type RouteContext = { params: Promise<Record<string, string | string[] | undefined>> };
 
 /** Adapts an Endpoint to a Next.js route handler. */
-export function toRoute<P extends string, B>(def: Endpoint<P, B>) {
+export function toRoute<P extends string, B, Q>(def: Endpoint<P, B, Q>) {
   return async (req: NextRequest, route: RouteContext): Promise<NextResponse> => {
     const noStore = { "cache-control": "no-store" };
     try {
@@ -57,6 +57,7 @@ export function toRoute<P extends string, B>(def: Endpoint<P, B>) {
         },
         email: appEmailSender(env),
         appUrl: env.APP_URL,
+        bankAccountKey: env.BANK_ACCOUNT_ENCRYPTION_KEY ?? null,
         mfa: {
           hasVerifiedFactor: async () => {
             const { data, error } = await supabase.auth.mfa.listFactors();
@@ -66,7 +67,13 @@ export function toRoute<P extends string, B>(def: Endpoint<P, B>) {
         },
       };
 
-      const result = await executeEndpoint(def, ctx, { params: await route.params, body });
+      const result = await executeEndpoint(def, ctx, {
+        params: await route.params,
+        body,
+        query: Object.fromEntries(req.nextUrl.searchParams),
+        idempotencyKey: req.headers.get("idempotency-key"),
+      });
+      if (result.body instanceof Response) return result.body as NextResponse;
       return NextResponse.json(result.body, { status: result.status, headers: noStore });
     } catch (e) {
       const { status, body } = errorResponse(e);
