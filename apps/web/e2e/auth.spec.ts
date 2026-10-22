@@ -44,7 +44,9 @@ test("sign up, verify email, enable TOTP and log in with MFA", async ({ page }) 
   await page.waitForTimeout(30_000 - (now % 30_000) + 500);
   await page.getByLabel("Authentication code").fill(totp(secret));
   await page.getByRole("button", { name: "Verify" }).click();
-  await expect(page.getByRole("heading", { name: "About your business" })).toBeVisible();
+  // Back to the page that was asked for before the second factor.
+  await expect(page).toHaveURL(/\/account$/);
+  await expect(page.getByRole("heading", { name: "My account" })).toBeVisible();
 });
 
 test("wrong password is refused without revealing whether the account exists", async ({ page }) => {
