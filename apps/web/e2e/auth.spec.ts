@@ -8,6 +8,8 @@ import { PASSWORD, signUp, totp, uniqueEmail } from "./support";
 test.describe.configure({ mode: "serial" });
 
 test("sign up, verify email, enable TOTP and log in with MFA", async ({ page }) => {
+  // Waits for a fresh 30 s TOTP window, so it needs more than the default timeout.
+  test.setTimeout(120_000);
   const email = uniqueEmail("ac01");
   await signUp(page, { email, name: "Ada Obi", orgName: "Ada Bakery", kind: "business" });
 
